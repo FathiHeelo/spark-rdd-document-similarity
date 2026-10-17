@@ -1,0 +1,29 @@
+# sbt and Scala build output
+target/
+project/target/
+project/project/
+*.class
+*.jar
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Spark runtime artifacts
+spark-warehouse/
+metastore_db/
+derby.log
+.sparkStaging/
+
+# OS and temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# Generated assignment output
+output/
