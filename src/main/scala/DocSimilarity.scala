@@ -3,7 +3,11 @@ import org.apache.hadoop.fs.Path
 
 object DocSimilarity {
 
-  def jaccard(a: Set[String], b: Set[String]): Double = ???
+  def jaccard(a: Set[String], b: Set[String]): Double = {
+    val intersection = a.intersect(b)
+    val union = a.union(b)
+    if (union.isEmpty) 0.0 else intersection.size.toDouble / union.size
+  }
 
   def main(args: Array[String]): Unit = {
     val Array(inputDir, stopwordsPath, outputDir) = args
@@ -31,7 +35,11 @@ object DocSimilarity {
 
     // Task 3: RDD[(d1, d2, score)] with d1 < d2
     val tokenSets = tokens.mapValues(_.toSet).cache()
-    val scores = tokenSets.cartesian(tokenSets).filter(???).map(???)
+    val scores = tokenSets.cartesian(tokenSets)
+      .filter { case ((d1, _), (d2, _)) => d1 < d2 }
+      .map { case ((d1, set1), (d2, set2)) =>
+        (d1, d2, jaccard(set1, set2))
+      }
 
     // Task 4: top 20, saved as d1,d2,score
     val top20 = scores.takeOrdered(20)(???)
