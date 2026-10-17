@@ -9,7 +9,12 @@ object DocSimilarity {
     val Array(inputDir, stopwordsPath, outputDir) = args
     val sc = new SparkContext(new SparkConf().setAppName("DocSimilarity"))
 
-    val stopWordsBc = sc.broadcast(???)                      // Set[String]
+    val stopWords = sc.textFile(stopwordsPath)
+      .map(_.trim.toLowerCase)
+      .filter(_.nonEmpty)
+      .collect()
+      .toSet
+    val stopWordsBc = sc.broadcast(stopWords)
 
     // Task 1: RDD[(fileName, content)]
     val docs = sc.wholeTextFiles(inputDir).map { case (path, content) =>
@@ -17,7 +22,12 @@ object DocSimilarity {
     }
 
     // Task 2: RDD[(fileName, List[token])]
-    val tokens = docs.mapValues(???)
+    val tokens = docs.mapValues { content =>
+      content.split("\\s+").iterator
+        .map(_.toLowerCase)
+        .filter(token => token.length > 1 && !stopWordsBc.value.contains(token))
+        .toList
+    }
 
     // Task 3: RDD[(d1, d2, score)] with d1 < d2
     val tokenSets = tokens.mapValues(_.toSet).cache()
